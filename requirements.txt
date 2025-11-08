@@ -11,7 +11,7 @@ numpy==1.26.2
 
 # API integrations
 requests==2.31.0
-aiohttp==3.9.1
+aiohttp==3.12.14
 
 # CRM integrations
 hubspot-api-client>=8.0.0
