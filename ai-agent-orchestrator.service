@@ -1,0 +1,26 @@
+[Unit]
+Description=AI Agent Orchestrator - Autonomous Startup Operations
+Documentation=file:///home/keith/chat-copilot/ai-agents/README.md
+After=network.target
+
+[Service]
+Type=simple
+User=keith
+Group=keith
+WorkingDirectory=/home/keith/chat-copilot/ai-agents
+Environment="PATH=/home/keith/chat-copilot/ai-agents/.venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/keith/chat-copilot/ai-agents/.venv/bin/python3 orchestrator.py --daemon
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/keith/chat-copilot/ai-agents/logs/orchestrator.log
+StandardError=append:/home/keith/chat-copilot/ai-agents/logs/orchestrator-error.log
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/keith/chat-copilot/ai-agents
+
+[Install]
+WantedBy=multi-user.target

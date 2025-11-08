@@ -1,0 +1,115 @@
+# AI Agent System Configuration
+# Configuration for all specialized agents
+
+# Orchestrator Settings
+orchestrator:
+  enabled: true
+  log_level: INFO
+  report_directory: /home/keith/chat-copilot/ai-agents/reports
+  cache_directory: /home/keith/chat-copilot/ai-agents/cache
+
+# Agent Scheduling
+scheduling:
+  daily:
+    time: "08:00"
+    agents: ["sales_dev", "market_intel", "customer_success"]
+  weekly:
+    day: "monday"
+    time: "09:00"
+    agents: ["financial"]
+  monthly:
+    day: 1
+    time: "10:00"
+    agents: ["all"]
+
+# Agent-Specific Configuration
+agents:
+  sales_dev:
+    enabled: true
+    daily_lead_target: 50
+    target_verticals:
+      - healthcare
+      - retail-chains
+      - restaurant-chains
+      - banking-financial
+      - education-government
+      - manufacturing
+      - msp-platform
+      - hospitality-hotels
+      - franchise-operations
+      - dns-certificate-saas
+    gtm_plans_dir: /home/keith/chat-copilot/go-to-market-plans
+
+  financial:
+    enabled: true
+    year_1_arr_target: 85700000
+    year_2_arr_target: 292600000
+    year_3_arr_target: 524400000
+    reporting_frequency: weekly
+
+  market_intel:
+    enabled: true
+    competitors:
+      - Cisco Meraki
+      - Auvik
+      - Domotz
+      - SolarWinds
+      - PRTG Network Monitor
+    monitoring_topics:
+      - network management
+      - AI networking
+      - MSP tools
+
+  customer_success:
+    enabled: true
+    health_check_frequency: daily
+    at_risk_threshold: 70
+    customers:
+      - name: "Arby's"
+        locations: 3400
+        devices: 10200
+        vertical: restaurant
+      - name: "Buffalo Wild Wings"
+        locations: 1200
+        devices: 3600
+        vertical: restaurant
+      - name: "Sonic"
+        locations: 3500
+        devices: 10500
+        vertical: restaurant
+
+# Integration Settings
+integrations:
+  crm:
+    enabled: false
+    provider: hubspot  # or salesforce
+    api_key_env: HUBSPOT_API_KEY
+
+  email:
+    enabled: false
+    provider: sendgrid
+    api_key_env: SENDGRID_API_KEY
+    from_email: agents@yourcompany.com
+
+  slack:
+    enabled: false
+    webhook_url_env: SLACK_WEBHOOK_URL
+    channel: "#ai-agents"
+
+# MCP Server Integration
+mcp:
+  enabled: true
+  servers:
+    - perplexity-mcp
+    - memory
+    - sequential_thinking
+    - fetch
+    - github
+    - git
+
+# Performance Metrics
+metrics:
+  prometheus_enabled: false
+  prometheus_port: 9090
+  log_metrics_to_file: true
+  metrics_file: /home/keith/chat-copilot/ai-agents/logs/metrics.jsonl

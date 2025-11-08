@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # Orchestrator - Master coordinator running all agents
+  orchestrator:
+    build: .
+    container_name: ai-agent-orchestrator
+    command: python orchestrator.py
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+      - ./reports:/app/reports
+      - ./config:/app/config:ro
+      - /home/keith/chat-copilot/go-to-market-plans:/app/gtm-plans:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=America/New_York
+    networks:
+      - ai-agent-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; exit(0 if os.path.exists('/app/logs/metrics.jsonl') else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Dashboard - Web interface for monitoring
+  dashboard:
+    build: .
+    container_name: ai-agent-dashboard
+    command: python dashboard/agent_dashboard.py
+    restart: unless-stopped
+    ports:
+      - "11050:11050"
+    volumes:
+      - ./logs:/app/logs:ro
+      - ./cache:/app/cache:ro
+      - ./reports:/app/reports:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+      - TZ=America/New_York
+    networks:
+      - ai-agent-network
+    depends_on:
+      - orchestrator
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11050/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  ai-agent-network:
+    driver: bridge
+
+volumes:
+  logs:
+  cache:
+  reports:

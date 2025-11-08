@@ -1,0 +1,146 @@
+version: '3.8'
+
+# Advanced configuration with individual agent services for scaling
+
+services:
+  # Orchestrator - Master coordinator
+  orchestrator:
+    build: .
+    container_name: ai-agent-orchestrator
+    command: python orchestrator.py
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+      - ./reports:/app/reports
+      - ./config:/app/config:ro
+      - /home/keith/chat-copilot/go-to-market-plans:/app/gtm-plans:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=America/New_York
+    networks:
+      - ai-agent-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # Dashboard - Web interface
+  dashboard:
+    build: .
+    container_name: ai-agent-dashboard
+    command: python dashboard/agent_dashboard.py
+    restart: unless-stopped
+    ports:
+      - "11050:11050"
+    volumes:
+      - ./logs:/app/logs:ro
+      - ./cache:/app/cache:ro
+      - ./reports:/app/reports:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+      - TZ=America/New_York
+    networks:
+      - ai-agent-network
+    depends_on:
+      - orchestrator
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  # Individual Agent Services (for scaling and isolation)
+  # Uncomment and use these if you want to run agents as separate containers
+
+  # sales-agent:
+  #   build: .
+  #   command: python sales/lead_generation_agent.py
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./logs:/app/logs
+  #     - ./cache:/app/cache
+  #     - ./config:/app/config:ro
+  #     - /home/keith/chat-copilot/go-to-market-plans:/app/gtm-plans:ro
+  #   environment:
+  #     - PYTHONUNBUFFERED=1
+  #     - AGENT_NAME=sales_dev
+  #   networks:
+  #     - ai-agent-network
+  #   deploy:
+  #     replicas: 2  # Scale to 2 instances
+  #     resources:
+  #       limits:
+  #         cpus: '0.5'
+  #         memory: 512M
+
+  # government-sales-agent:
+  #   build: .
+  #   command: python sales/government_sales_agent.py
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./logs:/app/logs
+  #     - ./cache:/app/cache
+  #     - ./config:/app/config:ro
+  #   environment:
+  #     - PYTHONUNBUFFERED=1
+  #     - AGENT_NAME=government_sales
+  #   networks:
+  #     - ai-agent-network
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.5'
+  #         memory: 512M
+
+  # customer-success-agent:
+  #   build: .
+  #   command: python operations/customer_success_agent.py
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./logs:/app/logs
+  #     - ./cache:/app/cache
+  #     - ./config:/app/config:ro
+  #   environment:
+  #     - PYTHONUNBUFFERED=1
+  #     - AGENT_NAME=customer_success
+  #   networks:
+  #     - ai-agent-network
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.5'
+  #         memory: 512M
+
+  # Redis - For agent coordination and caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: ai-agent-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ai-agent-network
+    command: redis-server --appendonly yes
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  ai-agent-network:
+    driver: bridge
+
+volumes:
+  logs:
+  cache:
+  reports:
+  redis-data:
